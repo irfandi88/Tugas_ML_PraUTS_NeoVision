@@ -1,11 +1,11 @@
 # app.py — Aplikasi Streamlit Prediksi Kelulusan Mahasiswa
-import streamlit as st # type: ignore
+import streamlit as st
 import joblib
 import pandas as pd
 
 # --- 1. LOAD MODEL & SCALER ---
 try:
-    # Memuat Model dan Scaler yang telah di-tuning dan bebas leakage (8 Fitur)
+    # Memuat Model dan Scaler yang telah di-tuning (8 Fitur: Nilai dan Kehadiran)
     model = joblib.load('model_kelulusan.pkl')
     scaler = joblib.load('scaler_kelulusan.pkl')
 except FileNotFoundError:
@@ -24,7 +24,7 @@ berdasarkan data **nilai dan kehadiran mentah** (8 Fitur).
 # --- 3. FORM INPUT DATA (8 FITUR) ---
 st.header("🧾 Input Data Mahasiswa")
 
-# Semua input HARUS berjumlah 8 dan sesuai dengan kolom X saat training
+# Ambil input fitur
 attendance = st.slider("1️⃣ Kehadiran (%)", 0, 100, 90)
 midterm = st.slider("2️⃣ Nilai UTS", 0, 100, 75)
 final = st.slider("3️⃣ Nilai UAS", 0, 100, 80)
@@ -32,18 +32,18 @@ assign_avg = st.slider("4️⃣ Rata-rata Nilai Tugas", 0, 100, 85)
 participation = st.slider("5️⃣ Partisipasi Kelas", 0, 100, 80)
 study_hours = st.slider("6️⃣ Jam Belajar per Minggu", 0, 40, 10)
 age = st.slider("7️⃣ Usia Mahasiswa", 17, 35, 20)
-gender = st.selectbox("8️⃣ Jenis Kelamin", ["Laki-laki", "Perempuan"]) # Ini di-encode jadi fitur ke-8
+gender = st.selectbox("8️⃣ Jenis Kelamin", ["Laki-laki", "Perempuan"])
 
-# Mapping gender ke numerik (0 atau 1)
-gender_num = 0 if gender == "Laki-laki" else 1
+# !!! SOLUSI ERROR: Mapping gender ke numerik (0 atau 1) dilakukan di sini !!!
+# Variabel gender_num sekarang sudah dikenal oleh seluruh script di bawahnya.
+gender_num = 0 if gender == "Laki-laki" else 1 
 
 # --- 4. KONVERSI INPUT KE DATAFRAME SESUAI TRAINING ---
-# Pastikan hanya 8 nilai yang dimasukkan ke sini:
 input_data = pd.DataFrame([[
     attendance, midterm, final, assign_avg, participation,
     study_hours, age, gender_num
 ]], columns=[
-    # Pastikan daftar 8 kolom di sini SAMA PERSIS dengan FEATURE_COLUMNS di script training
+    # Daftar 8 kolom yang digunakan untuk training
     'attendance', 'midterm', 'final', 'assign_avg', 'participation',
     'study_hours', 'age', 'gender'
 ])
